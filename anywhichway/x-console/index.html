@@ -1,0 +1,28 @@
+<template tagname="x-console">
+<style>
+input { margin-top:.5em; margin-bottom:.5em; width: calc(100% - 3ch); }
+@keyframes blinker { to { opacity: 0; } }
+span { animation: blinker 1.7s cubic-bezier(.5, 0, 1, 1) infinite alternate; }
+</style>
+<span>&gt;&nbsp;</span><input placeholder="${typeof(placeholder)==='undefined' ? '' : placeholder}" title="${title||'JavaScript console'}">
+<script>
+	this.style.width = "100%"
+	if(this.nextElementSibling===target) { // if a target was not specified, put if before the editor
+		this.shadowRoot.firstChild.before(target);
+	}
+	const editor = this.shadowRoot.querySelector("input");
+	editor.addEventListener("change",async (event) => {
+		let value =event.target.value;
+		if(value==="") {
+			return;
+		}
+		try {
+			value = await Function("return async () => { return " + value + "}")()();
+			target.innerHTML += `<div>${JSON.stringify(value)}</div>`;
+			editor.value = "";
+		} catch(error) {
+			target.innerHTML += `<div><error>${JSON.stringify(error.message)}</error></div>`;
+		}
+	})
+</script>
+</template>
