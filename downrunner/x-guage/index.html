@@ -1,0 +1,73 @@
+<template tagname="x-guage" type="application/json">
+<script>
+	async function getData(url,key) {
+		const text = await fetch(url).then((response) => response.ok ? response.text() : `{${key}:0}`);
+		if(text[0]=="{") {
+			const data = RJSON.parse(text);
+			if(data && typeof(data)==="object") {
+				return data[key]||0;
+			}
+			return 0;
+		}
+		if(text[0]=="(") {
+			const data = eval(text);
+			if(data && typeof(data)==="object") {
+				return data[key]||0;
+			}
+			return 0;
+		}
+		let value = parseInt(text);
+		if(typeof(value)==="number" && !isNaN(value)) {
+			return value;
+		}
+		return 0;
+	}
+	await require("https://www.gstatic.com/charts/loader.js");
+	
+	const readings = parameters.json.readings || parameters.json,
+		options = Object.assign({},parameters.json.options,parameters.attributes.options);
+	
+	let drawn;
+	this.intervals || (this.intervals = []);
+	let interval;
+	while(interval = this.intervals.pop()) {
+		clearInterval(interval);
+	}
+	for(let i=0;i<readings.length;i++) {
+		let [label,value,property,refreshRate] = readings[i];
+		const type = typeof(value);
+		if(type==="number") {
+			readings[i] = [label,value]
+			continue;
+		}
+		if(type==="string" && (value.startsWith(".") || value.startsWith("http"))) {
+			refreshRate || (refreshRate = options.refreshRate);
+			refreshRate = parseInt(refreshRate) * 1000;
+			property || (property = options.property);
+			if(!isNaN(refreshRate)) {
+				setTimeout(() => {
+					const interval = setInterval(async () => {
+						readings[i] = [label,await getData(value,property)];
+						if(drawn) {
+							drawChart();
+						}
+					},refreshRate);
+					this.intervals.push(interval);
+				},Math.random()*5);
+			}
+			readings[i] = [label,0];
+		}
+	}
+	
+	google.charts.load('current', {'packages':['gauge']});
+	google.charts.setOnLoadCallback(drawChart);
+	function drawChart() {
+		drawn = true;
+		const data = new google.visualization.arrayToDataTable([
+				["Label","Value"],
+				...readings
+			]);
+		new google.visualization.Gauge(target).draw(data,options);
+	}
+</script>
+</template>
