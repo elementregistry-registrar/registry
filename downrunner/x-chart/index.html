@@ -1,0 +1,31 @@
+<template tagname="x-chart">
+<script>
+	await require("https://www.gstatic.com/charts/loader.js");
+	const rows = parameters.json.rows || parameters.json,
+		options = Object.assign({},parameters.json.options,parameters.attributes.options),
+		type = parameters.json.type || parameters.attributes.type || "PieChart";
+	let columns = parameters.json.columns || parameters.attributes.columns || [];
+	google.charts.load('current', {'packages':['corechart','table']});
+	google.charts.setOnLoadCallback(drawChart);
+	function drawChart() {
+		var data = new google.visualization.DataTable();
+		if(columns.every((col) => typeof(col)==="string")) {
+			columns = [{type:"string", title:columns[0]},{type:"number", title:columns[1]}]
+		}
+		columns.forEach(({type,title}) => data.addColumn(type,title));
+		data.addRows(rows.map((data) => {
+			if(Array.isArray(data)) {
+				return data;
+			}
+			var {label,value} = data;
+			if(label!=null || value!=null) {
+				return [label,value];
+			}
+			const labelKey = columns.find(({type}) => type==="string").title,
+				valueKey = columns.find(({type}) => type==="number").title;
+			return [data[labelKey], data[valueKey]];
+		}));
+		new google.visualization[type](target).draw(data,Object.assign({title:target.id||""},options));
+	}
+</script>
+</template>
