@@ -1,0 +1,29 @@
+<template tagname="x-md-extras">
+<script>
+	let el = this.previouseElement;
+	if(el) {
+		if(parameters.align) {
+			if(el.tagName==="P") {
+				el.style.textAlign = parameters.align;
+			} else {
+				el.style.float = parameters.align;
+			}
+			
+		}
+		Object.entries(parameters).forEach(([key,value]) => {
+			if(key==="style") {
+				if(value && typeof(value)==="object") {
+					Object.entries(value).forEach(([key,value]) => {
+						el.style[key] = value;
+					})
+				}
+				return;
+			}
+			if(key!=="align") {
+				el.setAttribute(key,value);
+			}
+		})
+	}
+	
+</script>
+</template>

@@ -63,11 +63,26 @@
 	google.charts.setOnLoadCallback(drawChart);
 	function drawChart() {
 		drawn = true;
+		while(view.lastElementChild) {
+			view.lastElementChild.remove();
+		}
 		const data = new google.visualization.arrayToDataTable([
 				["Label","Value"],
 				...readings
 			]);
-		new google.visualization.Gauge(target).draw(data,options);
+		new google.visualization.Gauge(view).draw(data,options);
 	}
+	let oldwidth = window.innerWidth,
+		timeout;
+	window.addEventListener("resize",(event) => {
+		if(drawn && event.target===window && oldwidth<window.innerWidth) {
+			timeout = clearTimeout(timeout);
+			drawn = false;
+			setTimeout(() => {
+				oldwidth = window.innerWidth;
+				drawChart();
+			})
+		}
+	})
 </script>
 </template>

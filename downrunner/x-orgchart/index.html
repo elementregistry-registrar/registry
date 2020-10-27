@@ -1,0 +1,36 @@
+<template tagname="x-orgchart" type="application/json">
+<script>
+	await require("https://www.gstatic.com/charts/loader.js");
+	if(!this.hasAttribute("view")) {
+		throw new Error("x-orgchart must specify a target view id");
+	}
+	const org = parameters.json.org || parameters.json,
+		options = Object.assign({},parameters.json.options,parameters.attributes.options);
+	google.charts.load('current', {'packages':['orgchart']});
+	google.charts.setOnLoadCallback(drawChart);
+	function drawChart() {
+		var data = new google.visualization.DataTable();
+		data.addColumn('string', 'Name');
+		data.addColumn('string', 'Manager');
+		data.addColumn('string', 'ToolTip');
+		data.addRows(org.map((item) => { // values can also take the form {value:,format}
+			var name, manager, title, tooltip;
+			if(Array.isArray(item)) {
+				var [name,manager="",title="",tooltip=title] = item;
+			} else {
+				var {name,manager="",title="",tooltip=title} = item;
+			}
+			tooltip || (tooltip = title);
+			if(options.format) {
+				try {
+					name = {v:name,f:Function("name","manager","title","tooltip","return `" + options.format + "`")(name,manager,title,tooltip)}
+				} catch(e) {
+					name = e+"";
+				}
+			}
+			return [name,manager,tooltip]; 
+		}));
+		new google.visualization.OrgChart(view).draw(data,Object.assign({allowHtml:true,allowCollapse:true,title:view.id||name||""},options));
+	}
+</script>
+</template>

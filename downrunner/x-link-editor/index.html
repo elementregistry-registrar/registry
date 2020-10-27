@@ -1,0 +1,71 @@
+<template tagname="x-link-editor" type="application/json" observe="edit">
+<editor>
+<sup>+</sup>
+	<span hidden>
+		<input id="href" type="url" placeholder="link" title="link">
+		<input id="innerText" type="string" placeholder="decription" title="decription">
+		<input id="target" style="width:8ch" type="string" placeholder="target" title="target">
+		</span>
+</editor>
+<script>
+view.remove();
+view =  this.previousElementSibling;
+let edit = this.hasAttribute("edit"),
+	inline = this.hasAttribute("inline");
+const editors = this.shadowRoot.querySelector("span"),
+	label = this.shadowRoot.querySelector("sup"),
+	showHide = (edit) => {
+		if(!inline) {
+			label.setAttribute("hidden","");
+			editors.setAttribute("hidden","");
+			return;
+		}
+		if(edit) {
+			label.innerText = "-";
+			editors.removeAttribute("hidden");
+		} else {
+			label.innerText = "+";
+			editors.setAttribute("hidden","");
+		}
+	};
+
+label.addEventListener("click",() => {
+	if(edit) {
+		this.removeAttribute("edit");
+		showHide(edit = false)
+		return;
+	}
+	this.setAttribute("edit","");
+})
+this.shadowRoot.querySelector("[id=href]").value = view.href||"";
+this.shadowRoot.querySelector("[id=innerText]").value = view.innerText;
+this.shadowRoot.querySelector("[id=target]").value = view.target||"_top";
+editors.addEventListener("change",(event) => {
+	 view[event.target.id] = event.target.value;
+})
+this.attributeChanged = (name,oldValue,newValue) => {
+	if(name==="edit") {
+		if(newValue==null) {
+			showHide(edit = false);
+		} else {
+			showHide(edit = true);
+		}
+	}
+}
+Object.entries(parameters.json).forEach(([key,value]) => {
+	if(key==="style") {
+		const type = typeof(value);
+		if(type==="string") {
+			view.setAttribute("style",value);
+			return;
+		}
+		if(value && type==="object") {
+			Object.entries(value).forEach(([key,value]) => view.style[key] = value)
+		}
+		return;
+	}
+	view.setAttribute(key,value);
+})
+showHide(edit);
+</script>
+</template>

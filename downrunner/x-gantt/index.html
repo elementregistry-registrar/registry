@@ -64,21 +64,21 @@
 				delete options.gantt.start;
 			}
 		}
-		while(target.lastElementChild) {
-			target.lastElementChild.remove();
+		while(view.lastElementChild) {
+			view.lastElementChild.remove();
 		}
-		new google.visualization.Gantt(target).draw(data,options);
+		new google.visualization.Gantt(view).draw(data,options);
 		setTimeout(() => {
-			options.height = target.scrollHeight + 50;
+			options.height = view.scrollHeight + 50;
 			/*if(options.height<75) {
 				const ts = [].slice.call(target.querySelectorAll("text")),
 					height = ts.reduce((accum,t) => accum = Math.max(parseInt(t.getAttribute("y")),accum),0);
 				options.height = height;
 			}*/
-			while(target.lastElementChild) {
-				target.lastElementChild.remove();
+			while(view.lastElementChild) {
+				view.lastElementChild.remove();
 			}
-			new google.visualization.Gantt(target).draw(data,options);
+			new google.visualization.Gantt(view).draw(data,options);
 		},250);
 	}
 </script>
