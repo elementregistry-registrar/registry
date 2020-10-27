@@ -7,21 +7,21 @@ span { animation: blinker 1.7s cubic-bezier(.5, 0, 1, 1) infinite alternate; }
 <span>&gt;&nbsp;</span><input placeholder="${typeof(placeholder)==='undefined' ? '' : placeholder}" title="${title||'JavaScript console'}">
 <script>
 	this.style.width = "100%"
-	if(this.nextElementSibling===target) { // if a target was not specified, put if before the editor
-		this.shadowRoot.firstChild.before(target);
+	if(this.nextElementSibling===view) { // if a view was not specified, put if before the editor
+		this.shadowRoot.firstChild.before(view);
 	}
 	const editor = this.shadowRoot.querySelector("input");
 	editor.addEventListener("change",async (event) => {
-		let value =event.target.value;
+		let value = event.target.value;
 		if(value==="") {
 			return;
 		}
 		try {
 			value = await Function("return async () => { return " + value + "}")()();
-			target.innerHTML += `<div>${JSON.stringify(value)}</div>`;
+			view.innerHTML += `<div>${JSON.stringify(value)}</div>`;
 			editor.value = "";
 		} catch(error) {
-			target.innerHTML += `<div><error>${JSON.stringify(error.message)}</error></div>`;
+			view.innerHTML += `<div><error>${JSON.stringify(error.message)}</error></div>`;
 		}
 	})
 </script>
