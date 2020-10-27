@@ -1,0 +1,60 @@
+<template tagname="x-img-src-editor" type="application/json" observe="edit">
+<sup>+</sup><span hidden><input id="src" type="url" placeholder="image source url" title="image source"></span>
+<script>
+let edit = this.hasAttribute("edit"),
+	inline = this.hasAttribute("inline");
+const editors = this.shadowRoot.querySelector("span"),
+	label = this.shadowRoot.querySelector("sup"),
+	showHide = (edit) => {
+		if(!inline) {
+			label.setAttribute("hidden","");
+			editors.setAttribute("hidden","");
+			return;
+		}
+		if(edit) {
+			label.innerText = "-";
+			editors.removeAttribute("hidden");
+		} else {
+			label.innerText = "+";
+			editors.setAttribute("hidden","");
+		}
+	};
+
+label.addEventListener("click",() => {
+	if(edit) {
+		this.removeAttribute("edit");
+		showHide(edit = false)
+		return;
+	}
+	this.setAttribute("edit","");
+})
+this.shadowRoot.querySelector("[id=src]").value = this.previousElementSibling.src||"";
+editors.addEventListener("change",(event) => {
+	 this.previousElementSibling[event.target.id] = event.target.value;
+})
+this.attributeChanged = (name,oldValue,newValue) => {
+	if(name==="edit") {
+		if(newValue==null) {
+			showHide(edit = false);
+		} else {
+			showHide(edit = true);
+		}
+	}
+}
+Object.entries(parameters.json).forEach(([key,value]) => {
+	if(key==="style") {
+		const type = typeof(value);
+		if(type==="string") {
+			this.previousElementSibling.setAttribute("style",value);
+			return;
+		}
+		if(value && type==="object") {
+			Object.entries(value).forEach(([key,value]) => this.previousElementSibling.style[key] = value)
+		}
+		return;
+	}
+	this.previousElementSibling.setAttribute(key,value);
+})
+showHide(edit);
+</script>
+</template>

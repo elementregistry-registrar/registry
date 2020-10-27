@@ -25,7 +25,7 @@
 				valueKey = columns.find(({type}) => type==="number").title;
 			return [data[labelKey], data[valueKey]];
 		}));
-		new google.visualization[type](target).draw(data,Object.assign({title:target.id||""},options));
+		new google.visualization[type](view).draw(data,Object.assign({title:view.id||""},options));
 	}
 </script>
 </template>

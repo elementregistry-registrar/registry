@@ -1,0 +1,30 @@
+<template tagname="x-math-console">
+<style>
+input { margin-top:.5em; margin-bottom:.5em; width: calc(100% - 3ch); }
+@keyframes blinker { to { opacity: 0; } }
+span { animation: blinker 1.7s cubic-bezier(.5, 0, 1, 1) infinite alternate; }
+</style>
+<span>&gt;&nbsp;</span><input placeholder="${typeof(placeholder)==='undefined' ? '' : placeholder}" title="${title||'JavaScript console'}">
+<script>
+	await require("https://cdnjs.cloudflare.com/ajax/libs/mathjs/7.5.1/math.min.js");
+	this.style.width = "100%";
+	if(this.nextElementSibling===view) { // if a target was not specified, put if before the editor
+		this.shadowRoot.firstChild.before(view);
+	}
+	const  isMathJSObject = (data) => data && typeof(data)==="object" && JSON.parse(JSON.stringify(data)).mathjs,
+		editor = this.shadowRoot.querySelector("input");
+	editor.addEventListener("change",async (event) => {
+		let value =event.target.value;
+		if(value==="") {
+			return;
+		}
+		try {
+			value = await Function("return async (math) => { with(math) { return " + value + "} }")()(math);
+			view.innerHTML += `<div>${isMathJSObject(value) ? String(value) : JSON.stringify(value)}</div>`;
+			editor.value = "";
+		} catch(error) {
+			view.innerHTML += `<div><error>${JSON.stringify(error.message)}</error></div>`;
+		}
+	})
+</script>
+</template>

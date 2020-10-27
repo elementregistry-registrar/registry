@@ -1,0 +1,154 @@
+<template tagname="x-question" type="application/json">
+<script>
+	await require("https://www.gstatic.com/charts/loader.js");
+	let {label="",text,type,options=[],answer,answered,changeable,placeholder,tip} = parameters.json;
+	while(view.lastChild) {
+		view.lastChild.remove()
+	}
+	if(label) {
+		const el = document.createElement("label");
+		el.innerHTML = label + "&nbsp;";
+		view.appendChild(el);
+	}
+	const wrapper = document.createElement("span"),
+		thequestion = document.createElement("span");
+	wrapper.appendChild(thequestion);
+	thequestion.innerHTML = text + "&nbsp;";
+	view.appendChild(wrapper);
+	if(type==="radio") {
+		const input = document.createElement("input"),
+			radios = options.map((option) => {
+				const radio = document.createElement("input"),
+					label = document.createElement("label"),
+					id = text+":"+ option;
+				radio.setAttribute("id",id);
+				radio.setAttribute("type","radio");
+				radio.setAttribute("name",text);
+				radio.setAttribute("value",option);
+				if(option===answered) {
+					radio.setAttribute("checked",true);
+				}
+				if(answered && !changeable) {
+					radio.setAttribute("readonly","");
+					radio.setAttribute("disabled","");
+				}
+				radio.addEventListener("click",(event) => {
+					if(event.target.checked) {
+						input.setAttribute("value",radio.value);
+						if(answer && radio.value!==answer) {
+							wrapper.style.border = "solid 1px red";
+						} else {
+							wrapper.style.border = "none";
+						}
+					}
+					if(!changeable) {
+						radios.forEach((radio) => {
+							radio.setAttribute("readonly","");
+							radio.setAttribute("disabled","");
+						})
+					}
+				});
+				label.innerText = option;
+				label.setAttribute("for",id);
+				thequestion.appendChild(label);
+				thequestion.appendChild(radio);
+				return radio;
+			});
+		input.setAttribute("hidden","");
+		if(answered) {
+			input.setAttribute("value",answered);
+			if(answer && answered!==answer) {
+				wrapper.style.border = "solid 1px red";
+			} else {
+				wrapper.style.border = "none";
+			}
+		}
+		if(tip) thequestion.setAttribute("title",tip);
+		thequestion.appendChild(input);
+	} else if(type==="text") {
+		const input = document.createElement("input");
+		input.setAttribute("type",type);
+		if(placeholder) input.setAttribute("placeholder",placeholder);
+		if(tip) input.setAttribute("title",tip);
+		if(answered) {
+			input.setAttribute("value",answered);
+			if(answer && answered!==answer) {
+				wrapper.style.border = "solid 1px red";
+			}
+		}
+		input.addEventListener("change",(event) => {
+			if(answer && event.target.value!==answer) {
+				wrapper.style.border = "solid 1px red";
+			} else {
+				wrapper.style.border = "none";
+			}
+			if(!changeable) {
+				input.setAttribute("readonly","");
+				input.setAttribute("disabled","");
+			}
+		});
+		thequestion.appendChild(input);
+	} else if(type==="textarea") {
+		const input = document.createElement("textarea");
+		if(placeholder) input.setAttribute("placeholder",placeholder);
+		if(tip) input.setAttribute("title",tip);
+		if(answered) {
+			input.setAttribute("value",answered);
+			if(answer && answered!==answer) {
+				wrapper.style.border = "solid 1px red";
+			}
+		}
+		input.addEventListener("change",(event) => {
+			if(answer && event.target.value!==answer) {
+				wrapper.style.border = "solid 1px red";
+			} else {
+				wrapper.style.border = "none";
+			}
+			if(!changeable) {
+				input.setAttribute("readonly","");
+				input.setAttribute("disabled","");
+			}
+		});
+		thequestion.appendChild(input);
+	} else if(type==="select" || type==="select-multiple") {
+		const input = document.createElement("select");
+		if(tip) input.setAttribute("title",tip);
+		if(type==="select-multiple") input.setAttribute("multiple","");
+		const answers = Array.isArray(answered) ? answered : [answered]; 
+		options.forEach((option) => {
+			const el = document.createElement("option");
+			el.setAttribute("value",option);
+			el.innerText = option;
+			input.appendChild(el);
+		});
+		if(answered) {
+			input.setAttribute("value",answered);
+		}
+		if(answer && input.value!==answer) {
+			wrapper.style.border = "solid 1px red";
+		}
+		input.addEventListener("change",(event) => {
+			if(type==="select") {
+				if(answer && event.target.value!==answer) {
+					wrapper.style.border = "solid 1px red";
+				} else {
+					wrapper.style.border = "none";
+				}
+			} else {
+				const answered = [].slice.call(event.target.selectedOptions).map((option) => option.value);
+				answer = answer && Array.isArray(answer) ?  Array.isArray(answer[0]) ? answer : [answer] : answer;
+				if(answered.length>0 && Array.isArray(answer) && !answer.some((answer) => Array.isArray(answer) && answer.length===answered.length && answer.every((item) => answered.includes(item)))) {
+					wrapper.style.border = "solid 1px red";
+				} else {
+					wrapper.style.border = "none";
+				}
+			}
+			if(!changeable) {
+				input.setAttribute("readonly","");
+				input.setAttribute("disabled","");
+			}
+		});
+		thequestion.appendChild(input);
+	}
+</script>
+</template>
